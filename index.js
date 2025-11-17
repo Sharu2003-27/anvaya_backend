@@ -52,9 +52,6 @@ app.post("/agents", async (req, res) => {
             createdAt: newAgent.createdAt
         })
     } catch (error) {
-        if (error.code === 11000) {
-            return res.status(409).json({ error: `Sales agent with email '${req.body.email}' already exists.` })
-        }
         res.status(400).json({ error: "Error in adding new agent." })
     }
 })
