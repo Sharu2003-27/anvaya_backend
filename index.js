@@ -63,6 +63,30 @@ app.post("/agents", async (req, res) => {
 })
 
 // Delete a sales agent
+// app.delete("/agents/:id", async (req, res) => {
+//     try {
+//         const { id } = req.params
+
+//         if (!mongoose.Types.ObjectId.isValid(id)) {
+//             return res.status(400).json({ error: "Invalid agent ID." })
+//         }
+
+//         const leadWithAgent = await Lead.findOne({ salesAgent: id })
+//         if (leadWithAgent) {
+//             return res.status(400).json({ error: "Cannot delete agent while leads are assigned to this agent." })
+//         }
+
+//         const agent = await Agent.findByIdAndDelete(id)
+//         if (!agent) {
+//             return res.status(404).json({ error: `Agent with ID '${id}' not found.` })
+//         }
+
+//         res.status(200).json({ message: "Agent deleted successfully." })
+//     } catch (error) {
+//         res.status(500).json({ error: "Error in deleting agent." })
+//     }
+// })
+
 app.delete("/agents/:id", async (req, res) => {
     try {
         const { id } = req.params
@@ -71,10 +95,8 @@ app.delete("/agents/:id", async (req, res) => {
             return res.status(400).json({ error: "Invalid agent ID." })
         }
 
-        const leadWithAgent = await Lead.findOne({ salesAgent: id })
-        if (leadWithAgent) {
-            return res.status(400).json({ error: "Cannot delete agent while leads are assigned to this agent." })
-        }
+        // ADD THIS: Unassign leads from this agent before deleting
+        await Lead.updateMany({ salesAgent: id }, { $unset: { salesAgent: "" } });
 
         const agent = await Agent.findByIdAndDelete(id)
         if (!agent) {
@@ -373,27 +395,25 @@ app.put("/leads/:id", async (req, res) => {
 // })
 
 app.delete("/leads/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
+   try {
+       const { id } = req.params
+       if (!mongoose.Types.ObjectId.isValid(id)) {
+           return res.status(400).json({ error: "Invalid lead ID." })
+       }
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid agent ID." });
-    }
+       const lead = await Lead.findByIdAndDelete(id)
+       
+       if (!lead) {
+           return res.status(404).json({ error: `Lead with ID '${id}' not found.` })
+       }
 
-    const agent = await Agent.findByIdAndDelete(id);
+       await Comment.deleteMany({ lead: id })
 
-    if (!agent) {
-      return res.status(404).json({
-        error: `Agent with ID '${id}' not found.`
-      });
-    }
-
-    res.status(200).json({ message: "Agent deleted successfully." });
-
-  } catch (error) {
-    res.status(500).json({ error: "Error in deleting agent." });
-  }
-});
+       res.status(200).json({ message: "Lead deleted successfully." })
+   } catch (error) {
+       res.status(500).json({ error: "Error in deleting lead." })
+   }
+})
 
 // Get all comments for a lead
 app.get("/leads/:id/comments", async (req, res) => {
