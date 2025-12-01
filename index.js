@@ -371,7 +371,8 @@ app.put("/leads/:id", async (req, res) => {
 //         res.status(500).json({ error: "Error in deleting lead." })
 //     }
 // })
-app.delete("/agents/:id", async (req, res) => {
+
+app.delete("/leads/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -379,7 +380,6 @@ app.delete("/agents/:id", async (req, res) => {
       return res.status(400).json({ error: "Invalid agent ID." });
     }
 
-    // ✅ NOW DIRECTLY DELETE AGENT (NO LEAD CHECK)
     const agent = await Agent.findByIdAndDelete(id);
 
     if (!agent) {
