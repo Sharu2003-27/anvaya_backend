@@ -63,29 +63,6 @@ app.post("/agents", async (req, res) => {
 })
 
 // Delete a sales agent
-// app.delete("/agents/:id", async (req, res) => {
-//     try {
-//         const { id } = req.params
-
-//         if (!mongoose.Types.ObjectId.isValid(id)) {
-//             return res.status(400).json({ error: "Invalid agent ID." })
-//         }
-
-//         const leadWithAgent = await Lead.findOne({ salesAgent: id })
-//         if (leadWithAgent) {
-//             return res.status(400).json({ error: "Cannot delete agent while leads are assigned to this agent." })
-//         }
-
-//         const agent = await Agent.findByIdAndDelete(id)
-//         if (!agent) {
-//             return res.status(404).json({ error: `Agent with ID '${id}' not found.` })
-//         }
-
-//         res.status(200).json({ message: "Agent deleted successfully." })
-//     } catch (error) {
-//         res.status(500).json({ error: "Error in deleting agent." })
-//     }
-// })
 
 app.delete("/agents/:id", async (req, res) => {
     try {
@@ -154,10 +131,12 @@ app.get("/leads", async (req, res) => {
             id: lead._id,
             name: lead.name,
             source: lead.source,
-            salesAgent: {
-                id: lead.salesAgent._id,
-                name: lead.salesAgent.name
-            },
+            salesAgent: lead.salesAgent
+                ? {
+                    id: lead.salesAgent._id,
+                    name: lead.salesAgent.name
+                  }
+                : null,
             status: lead.status,
             tags: lead.tags,
             timeToClose: lead.timeToClose,
@@ -190,10 +169,12 @@ app.get("/leads/:id", async (req, res) => {
             id: lead._id,
             name: lead.name,
             source: lead.source,
-            salesAgent: {
-                id: lead.salesAgent._id,
-                name: lead.salesAgent.name
-            },
+            salesAgent: lead.salesAgent
+                ? {
+                    id: lead.salesAgent._id,
+                    name: lead.salesAgent.name
+                  }
+                : null,
             status: lead.status,
             tags: lead.tags,
             timeToClose: lead.timeToClose,
